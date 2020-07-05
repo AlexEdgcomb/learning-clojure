@@ -1,52 +1,54 @@
-(ns next-letter-chooser)
-(use 'clojure.data)
-(require '[clojure.string :as str])
+(ns next-letter-chooser
+    (:require [clojure.string :as str])
+    (:require [clojure.set :as cs]))
 
-(def already-letters #{
-  "A"
-  "B"
-  "D"
-  "E"
-  "F"
-  "G"
-  "I"
-  "K"
-  "L"
-  "M"
-  "N"
-  "O"
-  "P"
-  "R"
-  "S"
-  "T"
-  "U"})
-(def all-letters #{
-  "A"
-  "B"
-  "C"
-  "D"
-  "E"
-  "F"
-  "G"
-  "H"
-  "I"
-  "J"
-  "K"
-  "L"
-  "M"
-  "N"
-  "O"
-  "P"
-  "Q"
-  "R"
-  "S"
-  "T"
-  "U"
-  "V"
-  "W"
-  "X"
-  "Y"
-  "Z"})
+(def already-letters #{"A"
+                       "B"
+                       "D"
+                       "E"
+                       "F"
+                       "G"
+                       "I"
+                       "K"
+                       "L"
+                       "M"
+                       "N"
+                       "O"
+                       "P"
+                       "R"
+                       "S"
+                       "T"
+                       "U"})
+(def all-letters #{"A"
+                   "B"
+                   "C"
+                   "D"
+                   "E"
+                   "F"
+                   "G"
+                   "H"
+                   "I"
+                   "J"
+                   "K"
+                   "L"
+                   "M"
+                   "N"
+                   "O"
+                   "P"
+                   "Q"
+                   "R"
+                   "S"
+                   "T"
+                   "U"
+                   "V"
+                   "W"
+                   "X"
+                   "Y"
+                   "Z"})
+
+;;TODO: Note may have copy/paste errors:
+;;(with-open [rdr (clojure.java.io/reader "already-letters.txt")]
+;;   (def already-letters (set (line-seq rdr))))
 (def all-words #{
   "AB"
   "AD"
@@ -3511,42 +3513,33 @@
   "TRANSPLANTS"
   "WESTHAMPTON"})
 
-(defn subtract-set [a b]
-  (get (diff a b) 0))
+(def not-yet-letters (cs/difference all-letters already-letters))
 
-(def not-yet-letters (subtract-set all-letters already-letters))
-
-(defn word-uses-letters? [word letters]
+(defn word-uses-all-letters? [word letters]
   (every? letters (str/split word #"")))
 
-(defn all-words-by-letters [letters]
-  (set (filter #(word-uses-letters? % letters) all-words)))
+(defn all-words-using-letters [letters]
+  (set (filter #(word-uses-all-letters? % letters) all-words)))
 
-(def already-words (all-words-by-letters already-letters))
+(def already-words (all-words-using-letters already-letters))
 
-(def not-yet-words (subtract-set all-words already-words))
+(def not-yet-words (cs/difference all-words already-words))
 
 (defn new-words-by-letters [letters]
-  (subtract-set (all-words-by-letters letters) already-words))
+  (cs/difference (all-words-using-letters letters) already-words))
 
 (defn divider []
   (println "-------------------"))
 
 (defn new-letter-stats [letter]
   (let [new-words (new-words-by-letters (conj already-letters letter))]
-    (if (> (count new-words) 0)
-      (do
-        (print letter "would add ")
-        (println (count new-words) "words:" (sort new-words))
-        (divider)
-      )
-      ()
-    )
-  ))
+    (when (> (count new-words) 0)
+      (print letter "would add ")
+      (println (count new-words) "words:" (sort new-words))
+      (divider))))
 
 (defn -main []
   (println "Have" (count already-letters) "letters. To go:" (sort not-yet-letters))
   (println "Have" (count already-words) "of" (count all-words) "words. To go:" (count not-yet-words))
   (divider)
-  (doseq [letter (sort not-yet-letters)] (new-letter-stats letter))
-)
+  (doseq [letter (sort not-yet-letters)] (new-letter-stats letter)))
