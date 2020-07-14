@@ -8,6 +8,4 @@
   (do
     (print "Enter miles: ")
     (flush)
-    (println(str "Laps: " (format "%.2f" (miles-to-laps (get-float)))))
-  )
-)
+    (println (str "Laps: " (format "%.2f" (miles-to-laps (get-float)))))))

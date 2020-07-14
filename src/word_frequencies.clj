@@ -3,5 +3,4 @@
 
 (defn -main []
   (let [words (str/split (read-line) #" ") counts (frequencies words)] (doseq [word words]
-    (println (str word " " (get counts word)))))
-)
+    (println (str word " " (get counts word))))))
