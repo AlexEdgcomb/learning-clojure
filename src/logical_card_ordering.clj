@@ -1,8 +1,9 @@
 (ns logical-card-ordering
-    (:require [clojure.math.combinatorics :as combo]))
+    (:require [clojure.math.combinatorics :as combo])
+    (:require [clojure.set :as cs]))
 
 (with-open [rdr (clojure.java.io/reader "word-cards.txt")]
-  (def cards (vec (line-seq rdr))))
+  (def cards (set (line-seq rdr))))
 
 (defn edit-distance
   "Compute the edit distance between two strings."
@@ -16,11 +17,15 @@
                                        (edit-distance str1 str2 (dec m) n)
                                        (edit-distance str1 str2 (dec m) (dec n)))))))
 
-(defn make-pairs
-  [first rest])
+(def pairs (set (combo/combinations cards 2)))
 
-(def pairs (make-pairs (first cards) (rest cards)))
+(def cost-by-pair (apply merge (map #(hash-map % (edit-distance (first %) (second %))) pairs)))
 
+(def cost-1-pairs (cs/select #(= (get cost-by-pair %) 1) pairs))
+
+(def not-cost-1-pairs (cs/difference pairs cost-1-pairs))
 
 (defn -main []
-  (println (edit-distance (nth cards 0) (nth cards 1))))
+  (do
+    (println cost-1-pairs)
+    (println not-cost-1-pairs)))

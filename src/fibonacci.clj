@@ -1,18 +1,11 @@
 (ns fibonacci)
 
-(def penultimate
-  (comp second reverse))
-
-(defn fib
-  ([max v]
-    (let [a (penultimate v) b (last v)]
-      (if (> b max) v (fib max (conj v (+ a b))))))
-  ([max] (fib max [0 1])))
-
-(defn fib_str
-  ([a b c & r]
-    (str a " + " b " = " c "\n" (apply fib_str (conj r c b))))
-  ([a b] ""))
+(def fibonacci-numbers
+  ((fn fib [a b]
+     (lazy-seq (cons a (fib b (+ a b)))))
+   0 1))
 
 (defn -main []
-  (println (apply fib_str (fib 100))))
+  (do
+    (println "First 10 positive and even Fibonacci numbers")
+    (println (take 10 (filter #(and (even? %) (pos-int? %)) fibonacci-numbers)))))
